@@ -1,0 +1,1 @@
+worker: python psiholog_bot.py bot

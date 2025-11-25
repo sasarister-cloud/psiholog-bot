@@ -1,0 +1,44 @@
+{
+  "8226412349": {
+    "full_name": "da, depresivan sam što ležim kod kuće",
+    "messages": [
+      {
+        "role": "user",
+        "text": "bok",
+        "ts": "2025-11-20T21:45:36.911401"
+      },
+      {
+        "role": "user",
+        "text": "Bok",
+        "ts": "2025-11-20T22:21:39.181771"
+      }
+    ],
+    "diary": []
+  },
+  "1411602176": {
+    "full_name": "Saša Rister",
+    "messages": [
+      {
+        "role": "user",
+        "text": "Može",
+        "ts": "2025-11-20T21:58:31.290285"
+      },
+      {
+        "role": "user",
+        "text": "radi",
+        "ts": "2025-11-20T22:21:43.715604"
+      },
+      {
+        "role": "user",
+        "text": "Pero Peric",
+        "ts": "2025-11-20T22:56:06.111559"
+      },
+      {
+        "role": "user",
+        "text": "Tuzan sam neki danas",
+        "ts": "2025-11-20T22:58:07.744388"
+      }
+    ],
+    "diary": []
+  }
+}

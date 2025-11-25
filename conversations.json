@@ -1,0 +1,378 @@
+{
+  "1411602176": [
+    {
+      "timestamp": "2025-11-22T21:23:23.341605+00:00",
+      "role": "user",
+      "text": "Iscrpljen i umoran"
+    },
+    {
+      "timestamp": "2025-11-22T21:23:27.575936+00:00",
+      "role": "bot",
+      "text": "Žao mi je čuti da se osjećaš iscrpljeno i umorno. To može biti vrlo teško iskustvo. Ponekad, kad se suočavamo s previše obaveza ili stresom, možemo osjetiti fizičku i emocionalnu iscrpljenost. Možeš li podijeliti što te trenutno najviše opterećuje? Razgovor o tome može pomoći da se osjećaš lakše. Također, važno je brinuti se o sebi i uzeti vrijeme za odmor kada je to moguće."
+    },
+    {
+      "timestamp": "2025-11-22T21:23:49.224185+00:00",
+      "role": "user",
+      "text": "Puno obaveza i puno problema"
+    },
+    {
+      "timestamp": "2025-11-22T21:23:53.152026+00:00",
+      "role": "bot",
+      "text": "Razumijem da se možeš osjećati preopterećeno kada se suočavaš s puno obaveza i problema. To može biti jako izazovno i iscrpljujuće. Važno je pronaći trenutke za sebe, odvojiti vrijeme za opuštanje i brigu o sebi. \n\nMožda bi bilo korisno razmisliti o tome kako možeš organizirati svoje obaveze ili postaviti prioritete. Ipak, nemoj zaboraviti da je u redu zatražiti pomoć ili podršku kada ti je potrebna. Kako se ti nosiš s tim? "
+    },
+    {
+      "timestamp": "2025-11-22T21:24:34.498295+00:00",
+      "role": "user",
+      "text": "Nikada ne trazim pomoć. Svoje probleme rjesavam sam"
+    },
+    {
+      "timestamp": "2025-11-22T21:24:38.279099+00:00",
+      "role": "bot",
+      "text": "Razumijem da možeš imati osjećaj da je najbolje rješavati stvari sam, i to često može biti znak snage i neovisnosti. Međutim, važno je zapamtiti da svi mi ponekad prolazimo kroz teške trenutke i da je u redu potražiti pomoć kad nam zatreba. Dijeljenje svojih osjećaja i iskustava s nekim tko može pružiti podršku može biti jako korisno. Kako se ti osjećaš u vezi s tim?"
+    },
+    {
+      "timestamp": "2025-11-22T21:26:39.886873+00:00",
+      "role": "user",
+      "text": "Ne dijelim osjecaje niti ih pokazujem prema van"
+    },
+    {
+      "timestamp": "2025-11-22T21:26:45.126132+00:00",
+      "role": "bot",
+      "text": "Razumijem da može biti izazovno otvoriti se i podijeliti svoje osjećaje s drugima. Mnogi ljudi osjećaju sličan pritisak da ne pokažu ono što doživljavaju, bilo zbog straha od osude ili jednostavno zbog navike. Važno je znati da je u redu imati osjećaje, a također je važno pronaći način kako ih izraziti, čak i ako to ne radimo uvijek prema van.\n\nMožda bi ti moglo pomoći razmisliti o tome što te sprječava da dijeliš svoje emocije. Je li to strah, sram ili nešto drugo? Razgovor o tim osjećajima može biti prvi korak prema razumijevanju sebe i otvaranju prema drugima. Ako želiš, možemo istražiti tu temu zajedno."
+    },
+    {
+      "timestamp": "2025-11-22T23:39:17",
+      "role": "user",
+      "text": "Ne pokazujem svoje osjecaje nikome"
+    },
+    {
+      "timestamp": "2025-11-22T23:39:17",
+      "role": "assistant",
+      "text": "[emotional_tone] Dominantne emocije su povučenost i suzdržanost."
+    },
+    {
+      "timestamp": "2025-11-22T23:39:17",
+      "role": "assistant",
+      "text": "Razumijem da je to za tebe važan osjećaj. Često se događa da ljudi ne žele dijeliti svoje emocije s drugima zbog straha od osude, ranjivosti ili jednostavno zato što nisu naučili kako to učiniti. Možda se osjećaš sigurnije kada svoje emocije zadržavaš za sebe. \n\nMožeš li razmisliti o razlozima zbog kojih to činiš? Što te sprječava da otvoriš svoje srce prema drugima? Ponekad može biti korisno podijeliti svoje misli i osjećaje s nekim kome vjeruješ, čak i ako je to samo s jednim prijateljem ili članom obitelji.\n\nPostoji mnogo načina na koje možeš početi izražavati svoje emocije, čak i u malim koracima. Na primjer, možeš započeti s vođenjem dnevnika ili razgovorom s nekim tko ti je blizak. Što misliš o tome?"
+    },
+    {
+      "timestamp": "2025-11-22T23:39:48",
+      "role": "user",
+      "text": "Ne želim da itko.zna kako se osjecam"
+    },
+    {
+      "timestamp": "2025-11-22T23:39:48",
+      "role": "assistant",
+      "text": "[emotional_tone] Dominantne emocije u tekstu su tuga i povučenost."
+    },
+    {
+      "timestamp": "2025-11-22T23:39:48",
+      "role": "assistant",
+      "text": "Razumijem da se tako osjećaš i to je potpuno u redu. Mnogi ljudi prolaze kroz trenutke kada ne žele dijeliti svoje osjećaje s drugima. Možda se osjećaš ranjivo ili misliš da bi tvoji osjećaji mogli biti nerazumljeni. Što misliš, što te to točno sprječava da podijeliš svoje osjećaje s nekim? Razgovor o tome može biti prvi korak prema osjećaju olakšanja. Kako se trenutno nosiš s tim osjećajima unutar sebe?"
+    },
+    {
+      "timestamp": "2025-11-22T23:40:23",
+      "role": "user",
+      "text": "Moje osjecaje nitko ne zeli cuti i nitko ne razumije"
+    },
+    {
+      "timestamp": "2025-11-22T23:40:23",
+      "role": "assistant",
+      "text": "[emotional_tone] Dominantne emocije su tuga i usamljenost."
+    },
+    {
+      "timestamp": "2025-11-22T23:40:23",
+      "role": "assistant",
+      "text": "Razumijem da se osjećaš jako usamljeno i frustrirano zbog toga što tvoji osjećaji nisu prepoznati ili shvaćeni. To može biti iznimno teško. Važno je znati da tvoji osjećaji imaju vrijednost i da se zaslužuju čuti.\n\nMožda bismo mogli istražiti što točno osjećaš u ovom trenutku. Koje su to emocije koje bi volio podijeliti? Možda bi ti bilo korisno razgovarati o tome s nekim tko ti može pružiti podršku, bilo da je to prijatelj, član obitelji ili profesionalac. \n\nTakođer, razmisli o načinima na koje bi mogao izraziti svoje osjećaje – bilo pisanjem, umjetnošću ili čak vođenjem dnevnika. Na koji način misliš da bi ti to moglo pomoći? Tvoj glas je važan, i zaslužuješ da ga drugi čuju."
+    }
+  ],
+  "8226412349": [
+    {
+      "timestamp": "2025-11-23T09:49:41",
+      "role": "user",
+      "text": "Pozz"
+    },
+    {
+      "timestamp": "2025-11-23T09:49:41",
+      "role": "assistant",
+      "text": "[emotional_tone] Pozdrav! Kako mogu pomoći?"
+    },
+    {
+      "timestamp": "2025-11-23T09:49:41",
+      "role": "assistant",
+      "text": "Pozdrav! Kako si danas? Ovdje sam da te saslušam i podržim. Što te trenutno muči ili što bi volio podijeliti?"
+    },
+    {
+      "timestamp": "2025-11-23T09:50:13",
+      "role": "user",
+      "text": "Dobro sam, upravo sam se probudio"
+    },
+    {
+      "timestamp": "2025-11-23T09:50:13",
+      "role": "assistant",
+      "text": "[emotional_tone] Dominantne emocije su opuštenost i zadovoljstvo."
+    },
+    {
+      "timestamp": "2025-11-23T09:50:13",
+      "role": "assistant",
+      "text": "Drago mi je čuti da si dobro! Kako se osjećaš sada kada si se probudio? Postoji li nešto posebno što te veseli ili na što se raduješ danas? To može biti lijep način da započneš dan."
+    },
+    {
+      "timestamp": "2025-11-23T09:50:37",
+      "role": "user",
+      "text": "Veseli me što ću sa djevojkom ići na ručak"
+    },
+    {
+      "timestamp": "2025-11-23T09:50:37",
+      "role": "assistant",
+      "text": "[emotional_tone] Dominantne emocije su radost i uzbuđenje."
+    },
+    {
+      "timestamp": "2025-11-23T09:50:37",
+      "role": "assistant",
+      "text": "To je divno čuti! Odlazak na ručak s nekim koga volite može biti vrlo lijep način za povezivanje i uživanje u zajedničkom vremenu. Što vas najviše veseli u vezi s tim izlaskom? Ima li nešto posebno što planirate raditi ili razgovarati tijekom ručka?"
+    },
+    {
+      "timestamp": "2025-11-23T09:51:08",
+      "role": "user",
+      "text": "Posebno me veseli proslava njezinog rođendana 😁"
+    },
+    {
+      "timestamp": "2025-11-23T09:51:08",
+      "role": "assistant",
+      "text": "[emotional_tone] Dominantne emocije u tekstu su radost i uzbuđenje."
+    },
+    {
+      "timestamp": "2025-11-23T09:51:08",
+      "role": "assistant",
+      "text": "Drago mi je čuti da te veseli proslava njezinog rođendana! Rođendanske proslave često donose mnogo radosti i priliku za okupljanje s voljenima. Možeš li podijeliti što ti je posebno važno u toj proslavi? Je li to vrijeme provedeno s njom, darovi ili možda neki posebni trenuci koje ste zajedno doživjeli?"
+    },
+    {
+      "timestamp": "2025-11-23T09:52:09",
+      "role": "user",
+      "text": "Pozdrav"
+    },
+    {
+      "timestamp": "2025-11-23T09:52:09",
+      "role": "assistant",
+      "text": "[emotional_tone] Pozdrav! Kako mogu pomoći?"
+    },
+    {
+      "timestamp": "2025-11-23T09:52:09",
+      "role": "assistant",
+      "text": "Pozdrav! Drago mi je što si ovdje. Kako se osjećaš danas? Što te dovelo do razgovora sa mnom?"
+    },
+    {
+      "timestamp": "2025-11-23T09:53:30",
+      "role": "user",
+      "text": "Radim kao psiholog stručni suradnik u dječjem vrtiću. Jedini sam psiholog na 600-injak djece, i da Vam budem iskren, to me jako iscrpljuje."
+    },
+    {
+      "timestamp": "2025-11-23T09:53:30",
+      "role": "assistant",
+      "text": "[emotional_tone] Dominantne emocije u tekstu su iscrpljenost i stres."
+    },
+    {
+      "timestamp": "2025-11-23T09:53:30",
+      "role": "assistant",
+      "text": "Razumijem da se osjećate iscrpljeno, posebno kada ste jedini psiholog na tako velikom broju djece. To može biti izuzetno zahtjevno, kako emocionalno, tako i fizički. Vaša uloga je iznimno važna, ali također može nositi i veliku odgovornost.\n\nKako se nosite s tim pritiskom? Postoje li strategije ili aktivnosti koje vam pomažu da se opustite i napunite energiju? Ponekad je važno pronaći trenutke za sebe, kako biste se mogli brinuti o svojoj dobrobiti. Možda bismo mogli razgovarati o tome kako pronaći ravnotežu između vaših profesionalnih obaveza i vlastitih potreba."
+    },
+    {
+      "timestamp": "2025-11-23T09:55:11",
+      "role": "user",
+      "text": "Pa nosim se ponekad bolje , ponekad lošije. Poslodavac mi je ok, ali volio bih da je malo obzirniji, k tome sam i psiholog pripravnik. \n\nŠto se tiče opuštanja i punjenja energije, pomaže mi tjelesna aktivnost. Redovno odlazim u teretanu, minimalno tri puta tjedno."
+    },
+    {
+      "timestamp": "2025-11-23T09:55:11",
+      "role": "assistant",
+      "text": "[emotional_tone] Dominantne emocije u tekstu su mješavina nezadovoljstva i pozitivne motivacije."
+    },
+    {
+      "timestamp": "2025-11-23T09:55:11",
+      "role": "assistant",
+      "text": "Razumijem da se nosiš s promjenama u svom emocionalnom stanju, što je potpuno normalno, pogotovo u dinamičnom okruženju poput rada kao psiholog pripravnik. Svaka promjena može donijeti različite izazove, a važno je prepoznati i validirati te osjećaje. \n\nIzgleda da se s poslodavcem dobro slažeš, ali razumijem da ti je važno da osjećaš podršku i obzirnost. Možda bi bilo korisno razgovarati s njim o svojim potrebama ili očekivanjima, kako bi se stvorila bolja komunikacija i razumijevanje. Kako bi se osjećao u vezi s tim razgovorom?\n\nTvoj pristup opuštanju kroz tjelesnu aktivnost je jako zdrav i pozitivan. Redovno vježbanje može značajno doprinositi općem blagostanju. Koje vrste vježbi najviše uživaš? Možda bismo mogli istražiti i druge metode opuštanja koje bi ti mogle pomoći da se još bolje nosiš s izazovima. \n\nVažno je da se brineš o sebi i svojim potrebama. Kako bi se mogao dodatno osnažiti u ovim situacijama?"
+    },
+    {
+      "timestamp": "2025-11-23T09:57:12",
+      "role": "user",
+      "text": "Pa najviše uživam u vježbama s bučicama i šipkom, tu su i sajle naravno i smith mašina. Uz to, volim ergometar.\n\nA što se tiče dodatnog osnaživanja, mislim da bi pomogle i šetnje u prirodi na otvorenom, možda i čitanje, u kojemu nisam baš tako aktivan :)"
+    },
+    {
+      "timestamp": "2025-11-23T09:57:12",
+      "role": "assistant",
+      "text": "[emotional_tone] Dominantne emocije u tekstu su zadovoljstvo i opuštenost."
+    },
+    {
+      "timestamp": "2025-11-23T09:57:12",
+      "role": "assistant",
+      "text": "Drago mi je čuti da uživate u vježbama s bučicama, šipkom i ostalom opremom! Tjelesna aktivnost, posebno ona koja vam prija, može biti odličan način za oslobađanje stresa i poboljšanje raspoloženja. Vježbanje na otvorenom, poput šetnji u prirodi, može donijeti dodatne koristi, kao što su svjež zrak i kontakt s prirodom, što često pomaže u smanjenju anksioznosti.\n\nŠto se tiče čitanja, to može biti divan način za opuštanje i istraživanje novih ideja. Možda biste mogli razmisliti o tome što vas zanima ili o temama koje vas nadahnjuju. Čitanje ne samo da može proširiti vaš um, već može biti i način za bijeg iz svakodnevnih briga.\n\nKako se osjećate kada razmišljate o uključivanju više šetnji ili čitanja u svoju rutinu? Koje bi to aktivnosti ili knjige bile privlačne za vas?"
+    }
+  ],
+  "6877678856": [
+    {
+      "timestamp": "2025-11-23T22:11:09",
+      "role": "user",
+      "text": "Start"
+    },
+    {
+      "timestamp": "2025-11-23T22:11:09",
+      "role": "assistant",
+      "text": "[emotional_tone] Emocionalni ton teksta je neutralan i otvoren za daljnju komunikaciju."
+    },
+    {
+      "timestamp": "2025-11-23T22:11:09",
+      "role": "assistant",
+      "text": "Pozdrav! Kako se danas osjećaš? Ovdje sam da te slušam i podržim. O čemu bi volio/la razgovarati?"
+    },
+    {
+      "timestamp": "2025-11-23T22:12:26",
+      "role": "user",
+      "text": "Pozdrav! Osjecam se zalosno jer je gotov vikend i sutra u nove radne pobjede"
+    },
+    {
+      "timestamp": "2025-11-23T22:12:26",
+      "role": "assistant",
+      "text": "[emotional_tone] Dominantne emocije su tuga i nostalgija zbog završetka vikenda."
+    },
+    {
+      "timestamp": "2025-11-23T22:12:26",
+      "role": "assistant",
+      "text": "Pozdrav! Hvala ti što si podijelio svoje osjećaje sa mnom. Razumijem da ti je teško s mislima o kraju vikenda i povratku na posao. Mnogi se ljudi suočavaju s tim osjećajem, posebno kada se vikend čini kao vrijeme odmora i uživanja. Možeš li malo više pričati o tome što ti u tom trenutku stvara tugu? Što ti nedostaje kada pomisliš na početak radnog tjedna? Možda možemo zajedno pronaći načine kako da ti olakšamo tu tranziciju."
+    },
+    {
+      "timestamp": "2025-11-23T22:14:59",
+      "role": "user",
+      "text": "Nedostaje mi obitelj, prijatelji..jer radim daleko od kuce"
+    },
+    {
+      "timestamp": "2025-11-23T22:14:59",
+      "role": "assistant",
+      "text": "[emotional_tone] Dominantne emocije u tekstu su tuga i nostalgija."
+    },
+    {
+      "timestamp": "2025-11-23T22:14:59",
+      "role": "assistant",
+      "text": "Razumijem koliko ti može biti teško osjećati se udaljenim od obitelji i prijatelja, posebno kada si daleko od kuće. To može izazvati snažne emocije, poput usamljenosti ili tuge. Kako se nosiš s tim osjećajem? \n\nMožda bi ti moglo pomoći da razmisliš o načinu na koji možeš održavati te veze, čak i na daljinu. Jesi li razmišljao o redovitim video pozivima ili razmjeni poruka s voljenima? Također, možeš li pronaći načine da upoznaš nove ljude u svom novom okruženju? \n\nVažno je njegovati te odnose, ali i otvoriti se prema novim iskustvima. Kako se osjećaš glede toga?"
+    },
+    {
+      "timestamp": "2025-11-23T22:16:01",
+      "role": "user",
+      "text": "Odrzavam te odnose pozivima..ali svejedno"
+    },
+    {
+      "timestamp": "2025-11-23T22:16:01",
+      "role": "assistant",
+      "text": "[emotional_tone] Dominantne emocije u tekstu su tuga i frustracija."
+    },
+    {
+      "timestamp": "2025-11-23T22:16:01",
+      "role": "assistant",
+      "text": "Razumijem da se osjećaš frustrirano zbog održavanja odnosa putem poziva, a čini se da to možda ne donosi željene rezultate. Ponekad, unatoč trudu koji ulažemo, odnosi ne idu onako kako bismo željeli. Možda bismo mogli razgovarati o tome što točno osjećaš kada se suočavaš s ovom situacijom. Kako ti pozivi pomažu ili ne pomažu u održavanju tih odnosa? Što misliš da bi moglo biti drugačije? Tvoje misli i osjećaji su važni, a otvaranje o njima može donijeti jasniju sliku."
+    },
+    {
+      "timestamp": "2025-11-23T22:16:06",
+      "role": "user",
+      "text": "Je tesko"
+    },
+    {
+      "timestamp": "2025-11-23T22:16:06",
+      "role": "assistant",
+      "text": "[emotional_tone] Dominantne emocije su tuga i frustracija."
+    },
+    {
+      "timestamp": "2025-11-23T22:16:06",
+      "role": "assistant",
+      "text": "Čujem te, i razumijem da se osjećaš teško. Ponekad život može biti zaista izazovan i opterećujući. Možeš li mi reći malo više o tome što te trenutno muči? Što točno osjećaš? Razgovor o tim emocijama može biti koristan. Tu sam da te slušam."
+    },
+    {
+      "timestamp": "2025-11-23T22:17:17",
+      "role": "user",
+      "text": "Tesko mi je jer sam u novoj sredini, udaljena od obitelji i prijatelja. Morala sam se odseliti zbog posla. I zivot zapoceti ovdje"
+    },
+    {
+      "timestamp": "2025-11-23T22:17:17",
+      "role": "assistant",
+      "text": "[emotional_tone] Dominantne emocije u tekstu su tuga i nostalgija."
+    },
+    {
+      "timestamp": "2025-11-23T22:17:17",
+      "role": "assistant",
+      "text": "Razumijem da je ovo razdoblje u tvom životu vrlo izazovno. Promjena sredine i udaljenost od obitelji i prijatelja mogu izazvati osjećaj izolacije i tjeskobe. To su potpuno normalne reakcije na situaciju u kojoj se nalazite.\n\nKako se trenutno osjećate u toj novoj sredini? Postoje li trenuci ili aktivnosti koje vam pomažu da se osjećate bolje ili povezano s novim okruženjem? Možda bismo mogli razmisliti o nekim načinima kako stvoriti nove veze ili se prilagoditi ovoj novoj fazi u životu. Važno je dati sebi vrijeme da se prilagodite i ne zaboraviti na vlastite potrebe i emocije."
+    },
+    {
+      "timestamp": "2025-11-23T22:19:35",
+      "role": "user",
+      "text": "Trenutno mi je zivot odem na posao, vratim se doma..rucak, malo odmor, tusiranje i spavanje"
+    },
+    {
+      "timestamp": "2025-11-23T22:19:35",
+      "role": "assistant",
+      "text": "[emotional_tone] Dominantne emocije su monotonija i umor."
+    },
+    {
+      "timestamp": "2025-11-23T22:19:35",
+      "role": "assistant",
+      "text": "Razumijem da se trenutno osjećaš kao da je tvoj život pomalo rutinski i monotono. Takvi obrasci mogu stvoriti osjećaj stagnacije ili dosade. Važno je prepoznati kako se osjećaš u toj situaciji. \n\nMožda bi bilo korisno razmisliti o malim promjenama koje bi mogle unijeti malo svježine u tvoju svakodnevicu. Što misliš o tome da u svoj dan uključiš neku aktivnost koja te ispunjava ili opušta? To može biti šetnja, čitanje knjige, slušanje muzike ili čak pokušaj novog hobija. \n\nKako se osjećaš prema ideji da napraviš neki mali korak prema nečemu što bi ti moglo donijeti radost? Kakve aktivnosti bi ti se možda svidjele?"
+    },
+    {
+      "timestamp": "2025-11-23T22:19:53",
+      "role": "user",
+      "text": "Na poslu novi ljudi, neki nisu bas previse simpaticni"
+    },
+    {
+      "timestamp": "2025-11-23T22:19:53",
+      "role": "assistant",
+      "text": "[emotional_tone] Dominantne emocije su nezadovoljstvo i nelagoda."
+    },
+    {
+      "timestamp": "2025-11-23T22:19:53",
+      "role": "assistant",
+      "text": "Razumijem, nova radna okolina može biti izazovna, pogotovo kada se susrećete s ljudima koji vam se možda ne sviđaju ili s kojima se ne slažete. Kako se osjećate u vezi s tim? Možda biste mogli razmisliti o pozitivnim aspektima situacije. Postoji li netko tko vam se ipak čini simpatičnim ili s kim biste mogli razviti dobar odnos? \n\nTakođer, razmislite o tome kako biste mogli pristupiti tim osobama. Postavljanje granica i održavanje profesionalnog odnosa može pomoći. Što mislite o tome? Kako se možete zaštititi od negativnosti, a istovremeno ostati otvoreni za nove mogućnosti? Važno je brinuti se o sebi u takvim situacijama."
+    },
+    {
+      "timestamp": "2025-11-23T22:22:01",
+      "role": "user",
+      "text": "Da li da kazem sefu za situacije koje bi htjela promjeniti na poslu"
+    },
+    {
+      "timestamp": "2025-11-23T22:22:01",
+      "role": "assistant",
+      "text": "[emotional_tone] Emocije su nesigurnost i želja za promjenom."
+    },
+    {
+      "timestamp": "2025-11-23T22:22:01",
+      "role": "assistant",
+      "text": "Razumijem da se možeš osjećati nesigurno u vezi s tim hoćeš li podijeliti svoje misli sa šefom. To može biti važan korak prema promjenama koje želiš vidjeti na poslu. Razmislimo zajedno o nekoliko stvari.\n\nPrvo, kako se osjećaš u vezi s trenutnim situacijama na poslu? Što te najviše muči ili frustrira? \n\nIstraži i svoje motive za razgovor. Što bi željela postići tim razgovorom? Ponekad jasno definiranje svojih ciljeva može pomoći u oblikovanju samopouzdanja.\n\nTakođer, razmisli o načinu na koji bi mogla pristupiti razgovoru. Možda bi bilo korisno pripremiti se unaprijed i razmisliti o konkretnim primjerima ili prijedlozima za rješenja. To može pokazati tvoju proaktivnost i posvećenost.\n\nAko se odlučiš razgovarati sa šefom, sjeti se da je važno izraziti se jasno i mirno. Kako bi se ti osjećala da razgovaraš o tome? Što misliš da bi te moglo osnažiti u tom trenutku? \n\nBudi hrabra i vjeruj u svoje vrijednosti. Tvoj glas i tvoje ideje su važni!"
+    },
+    {
+      "timestamp": "2025-11-23T22:23:14",
+      "role": "user",
+      "text": "Imam vezu sa zauzetim muskarcem"
+    },
+    {
+      "timestamp": "2025-11-23T22:23:14",
+      "role": "assistant",
+      "text": "[emotional_tone] Dominantne emocije su tjeskoba i nesigurnost."
+    },
+    {
+      "timestamp": "2025-11-23T22:23:14",
+      "role": "assistant",
+      "text": "Razumijem da se nalaziš u vrlo složenoj situaciji. Veze sa zauzetim osobama često donose mnogo emocionalnih previranja i pitanja o tome što zapravo želiš i kako se osjećaš. Kako se ti osjećaš u ovoj vezi? Što te privlači u ovoj situaciji, a što ti možda stvara nelagodu?\n\nVažno je razmisliti o tome što ti ova veza donosi i što ti oduzima. Postavljaš li si pitanja o svojim vlastitim potrebama i željama? Razmišljanje o tome može ti pomoći da bolje razumiješ svoje emocije i doneseš odluke koje su u skladu s tvojim vrijednostima. Kako bi se voljela osjećati u ljubavnoj vezi?"
+    },
+    {
+      "timestamp": "2025-11-23T22:23:20",
+      "role": "user",
+      "text": "Sto da radim"
+    },
+    {
+      "timestamp": "2025-11-23T22:23:20",
+      "role": "assistant",
+      "text": "[emotional_tone] Dominantne emocije su nesigurnost i zabrinutost."
+    },
+    {
+      "timestamp": "2025-11-23T22:23:20",
+      "role": "assistant",
+      "text": "Razumijem da se možda osjećaš izgubljeno ili preplavljeno s pitanjem \"što da radim\". To je prirodan osjećaj, posebno kada se suočavamo s nejasnoćama ili izazovima. Možda bi bilo korisno da malo razjasnimo situaciju. \n\nŠto te točno muči ili u kojem području se osjećaš nesigurno? Postavljanje konkretnih pitanja može ti pomoći da razjasniš svoje misli i emocije. Također, razmisli o tome što bi ti donijelo osjećaj olakšanja ili zadovoljstva. \n\nPokušaj se usredotočiti na male korake koje možeš poduzeti. To može biti nešto jednostavno, poput vođenja dnevnika, razgovora s nekim kome vjeruješ ili istraživanja novih aktivnosti koje te zanimaju. Koji bi to korak mogao biti za tebe?"
+    }
+  ]
+}
