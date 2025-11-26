@@ -321,8 +321,10 @@ async def handle_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # =====================================================
 
 app = Flask(__name__)
-application: Application | None = None
-loop: asyncio.AbstractEventLoop | None = None
+#application: Application | None = None
+#loop: asyncio.AbstractEventLoop | None = None
+application = None
+loop = None
 
 
 @app.get("/")
