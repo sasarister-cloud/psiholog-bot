@@ -156,7 +156,9 @@ def main_bot_webhook():
     if not TELEGRAM_TOKEN:
         raise ValueError("TELEGRAM_TOKEN nije postavljen!")
 
-    application = Application.builder().token(TELEGRAM_TOKEN).build()
+    #application = Application.builder().token(TELEGRAM_TOKEN).build()
+    application = Application.builder().token(TELEGRAM_TOKEN).updater(None).build()
+
 
     # Command handlers
     application.add_handler(CommandHandler("start", start))
