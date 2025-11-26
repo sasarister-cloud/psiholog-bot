@@ -247,9 +247,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         InlineKeyboardButton("📊 Raspoloženje", callback_data="mood"),
     ]]
 
-    await update.message.reply_text(
+    await update.message.reply_textawait update.message.reply_text(
         "👋 Dobrodošao/la! Odaberi opciju iz izbornika:",
         reply_markup=InlineKeyboardMarkup(menu),
+    )
+    return),
     (
             "👋 Pozdrav adminu! Pristup ti je uvijek odobren. Kako se osjećaš danas?"
         )
@@ -370,8 +372,10 @@ async def handle_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Premium blokada
     if not is_admin and not user.get("premium", False):
         await query.edit_message_text(
-    "🔒 Ova opcija je dostupna samo korisnicima s premium podrškom.\n\n"
-    "Ako želiš pristup proširenim funkcijama, javi se administratoru. 😊"
+            "🔒 Ova opcija je dostupna samo korisnicima s premium podrškom.
+"
+"
+            "Ako želiš pristup, javi se administratoru."
         )
         return
 
@@ -437,7 +441,7 @@ def index():
 @app.post(f"/webhook/{TELEGRAM_TOKEN}")
 def telegram_webhook():
     from telegram import Update as TgUpdate
-    , loop
+    
 
     if application is None or loop is None:
         return "Application not ready", 500
@@ -449,16 +453,15 @@ def telegram_webhook():
     update = TgUpdate.de_json(data, application.bot)
     asyncio.run_coroutine_threadsafe(
         application.process_update(update), loop
-    )), loop
     )
 
     return "OK", 200
 
 
 async def init_telegram_application():
-    
+    global application
 
-    application = Application.builder().token(TELEGRAM_TOKEN).updater(None).build()
+    application = Application.builder().token(TELEGRAM_TOKEN).updater(None).build()().token(TELEGRAM_TOKEN).updater(None).build()
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("status", status_cmd))
