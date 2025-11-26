@@ -277,9 +277,20 @@ async def init_telegram_application():
     await application.initialize()
     await application.start()
 
+    #external_url = os.environ.get("RENDER_EXTERNAL_URL")
+    #if not external_url:
+    #    raise RuntimeError("RENDER_EXTERNAL_URL nije postavljen od Render-a!")
+    #  
+    #webhook_url = f"{external_url}/webhook/{TELEGRAM_TOKEN}"
+    #print(f"🌎 Webhook URL registriran: {
+
     external_url = os.environ.get("RENDER_EXTERNAL_URL")
     if not external_url:
         raise RuntimeError("RENDER_EXTERNAL_URL nije postavljen od Render-a!")
 
     webhook_url = f"{external_url}/webhook/{TELEGRAM_TOKEN}"
-    print(f"🌎 Webhook URL registriran: {
+    print(f"🌎 Webhook URL registriran: {webhook_url}")
+
+    await application.bot.set_webhook(url=webhook_url)
+
+
