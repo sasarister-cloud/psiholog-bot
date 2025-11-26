@@ -293,4 +293,19 @@ async def init_telegram_application():
 
     await application.bot.set_webhook(url=webhook_url)
 
+def start_flask():
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+
+
+if __name__ == "__main__":
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    loop.run_until_complete(init_telegram_application())
+
+    flask_thread = threading.Thread(target=start_flask)
+    flask_thread.start()
+
+    print("✅ Psiholog Bot na Render FREE je pokrenut i sluša webhook!")
+    loop.run_forever()
 
