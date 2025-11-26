@@ -345,6 +345,7 @@ def telegram_webhook():
     update = TgUpdate.de_json(data, application.bot)
     asyncio.run_coroutine_threadsafe(
         application.process_update(update), loop
+    )), loop
     )
 
     return "OK", 200
