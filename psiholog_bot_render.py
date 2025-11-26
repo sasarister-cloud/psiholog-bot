@@ -321,8 +321,6 @@ async def handle_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # =====================================================
 
 app = Flask(__name__)
-#application: Application | None = None
-#loop: asyncio.AbstractEventLoop | None = None
 application = None
 loop = None
 
@@ -335,7 +333,7 @@ def index():
 @app.post(f"/webhook/{TELEGRAM_TOKEN}")
 def telegram_webhook():
     from telegram import Update as TgUpdate
-    global application, loop
+    , loop
 
     if application is None or loop is None:
         return "Application not ready", 500
@@ -353,7 +351,7 @@ def telegram_webhook():
 
 
 async def init_telegram_application():
-    global application
+    
 
     application = Application.builder().token(TELEGRAM_TOKEN).updater(None).build()
 
@@ -386,7 +384,7 @@ def start_flask() -> None:
 if __name__ == "__main__":
     print("🤖 Psiholog Bot WEBHOOK verzija za Render FREE pokrenut!")
 
-    global loop
+    
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
