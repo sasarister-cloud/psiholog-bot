@@ -370,9 +370,8 @@ async def handle_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Premium blokada
     if not is_admin and not user.get("premium", False):
         await query.edit_message_text(
-            "🔒 Ova opcija je dostupna samo korisnicima s premium podrškom.
-"
-            "Ako želiš pristup, javi se administratoru."
+    "🔒 Ova opcija je dostupna samo korisnicima s premium podrškom.\n\n"
+    "Ako želiš pristup proširenim funkcijama, javi se administratoru. 😊"
         )
         return
 
