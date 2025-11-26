@@ -1,14 +1,14 @@
 # =====================================================================================
-#  Psiholog Bot - RENDER WEBHOOK VERZIJA (za Render FREE)
+#  Psiholog Bot - RENDER WEBHOOK VERZIJA (za Render FREE) + GLAVNI MENI
 # =====================================================================================
 #   ✅ radi bez pollinga
-#   ✅ NE koristi Updater/run_webhook
+#   ✅ NE koristi Updater.run_webhook
 #   ✅ koristi Flask webhook endpoint
 #   ✅ kompatibilan s python-telegram-bot 20.8
 #   ✅ kompatibilan s Python 3.13
 #   ✅ koristi users.json + conversations.json + memory.json
 #   ✅ admin (ADMIN_ID iz env) uvijek ima odobren premium bez isteka
-#   ✅ osnovne komande: /start, /status, /pending, /approve, chat
+#   ✅ glavni meni (inline gumbi) + /menu
 # =====================================================================================
 
 import os
@@ -22,7 +22,11 @@ from flask import Flask, request
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from telegram import Update
+from telegram import (
+    Update,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+)
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -213,7 +217,48 @@ def extend_subscription(user_id: int, days: int) -> None:
     save_users(users)
 
 # =====================================================
-# 5. AI CHAT FUNKCIJA
+# 5. GLAVNI MENI (INLINE GUMBI)
+# =====================================================
+
+
+def build_main_menu(user: Dict[str, Any]) -> InlineKeyboardMarkup:
+    """Gradi glavni meni za korisnika (pojednostavljena verzija, proširiva kasnije)."""
+    premium = bool(user.get("premium", False))
+
+    buttons: list[list[InlineKeyboardButton]] = [
+        [InlineKeyboardButton("📓 Dnevnik emocija", callback_data="OPEN_MOOD_DIARY")],
+        [
+            InlineKeyboardButton("🧠 AI psiholog", callback_data="AI_PSYCHOLOGIST"),
+            InlineKeyboardButton("🎯 Terapijski mod", callback_data="THERAPY_MODE"),
+        ],
+        [InlineKeyboardButton("📊 Analiza emocija", callback_data="EMOTION_ANALYSIS")],
+        [
+            InlineKeyboardButton("📅 Tjedni napredak", callback_data="WEEKLY_CHECK"),
+            InlineKeyboardButton("🗂 Arhiva", callback_data="SHOW_HISTORY"),
+        ],
+        [InlineKeyboardButton("👤 Moj profil", callback_data="SHOW_PROFILE")],
+    ]
+
+    if premium:
+        buttons.append(
+            [InlineKeyboardButton("⭐ Premium opcije", callback_data="PREMIUM_MENU")]
+        )
+
+    return InlineKeyboardMarkup(buttons)
+
+
+async def send_main_menu(
+    chat_id: int,
+    user: Dict[str, Any],
+    context: ContextTypes.DEFAULT_TYPE,
+    text: str = "📋 Glavni meni:",
+) -> None:
+    """Pošalji glavni meni korisniku."""
+    keyboard = build_main_menu(user)
+    await context.bot.send_message(chat_id=chat_id, text=text, reply_markup=keyboard)
+
+# =====================================================
+# 6. AI CHAT FUNKCIJA
 # =====================================================
 
 
@@ -241,9 +286,8 @@ async def ai_chat_reply(user: Dict[str, Any], user_text: str) -> str:
     except Exception as e:
         return f"⚠️ Greška AI servisa: {e}"
 
-
 # =====================================================
-# 6. SPREMANJE KONVERZACIJA I MEMORY
+# 7. SPREMANJE KONVERZACIJA I MEMORY
 # =====================================================
 
 
@@ -273,7 +317,7 @@ def append_memory_note(user_id: int, note: str) -> None:
     save_memory(mem)
 
 # =====================================================
-# 7. TELEGRAM HANDLERI
+# 8. TELEGRAM HANDLERI
 # =====================================================
 
 
@@ -282,11 +326,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     full_name = update.effective_user.full_name or "Nepoznat"
     user = get_or_create_user(user_id, full_name)
 
-    # Admin uvijek ima pristup
+    # Admin uvijek ima pristup i odmah vidi meni
     if ADMIN_ID is not None and user_id == ADMIN_ID:
-        await update.message.reply_text(
-            "👋 Pozdrav, admin! Pristup ti je uvijek odobren i premium.\n"
-            "Kako se osjećaš danas?"
+        await send_main_menu(
+            chat_id=update.effective_chat.id,
+            user=user,
+            context=context,
+            text="👋 Pozdrav, admin! Ovo je tvoj glavni meni:",
         )
         return
 
@@ -304,8 +350,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    await update.message.reply_text(
-        "👋 Dobrodošao/la natrag! Možeš mi ukratko opisati kako se osjećaš ili što te muči."
+    await send_main_menu(
+        chat_id=update.effective_chat.id,
+        user=user,
+        context=context,
+        text=(
+            "👋 Dobrodošao/la natrag!\n"
+            "Odaberi neku od opcija u glavnom meniju ili mi napiši kako se osjećaš."
+        ),
     )
 
 
@@ -326,6 +378,33 @@ async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"- Na čekanju: {waiting}\n"
         f"- Pretplata do: {sub_until}\n"
         f"- Premium: {premium}"
+    )
+
+
+async def menu_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Ručno otvaranje glavnog menija komandom /menu."""
+    user_id = update.effective_user.id
+    full_name = update.effective_user.full_name or "Nepoznat"
+    user = get_or_create_user(user_id, full_name)
+
+    # Isti sigurnosni uvjeti kao u start/handle_message
+    if not (ADMIN_ID is not None and user_id == ADMIN_ID):
+        if not user.get("approved", False):
+            await update.message.reply_text(
+                "⚠️ Još nemaš odobren pristup. Pričekaj da te admin odobri."
+            )
+            return
+        if not is_subscription_active(user):
+            await update.message.reply_text(
+                "⚠️ Tvoja pretplata je istekla. Javi se administratoru za produženje."
+            )
+            return
+
+    await send_main_menu(
+        chat_id=update.effective_chat.id,
+        user=user,
+        context=context,
+        text="📋 Glavni meni:",
     )
 
 
@@ -446,13 +525,94 @@ async def setpremium_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def handle_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Placeholder za buduće callback gumbe (meni, testovi, itd.)
+    """Obrada klikova na gumbe iz glavnog menija (osnovna verzija)."""
     query = update.callback_query
+    data = query.data
+    user_id = query.from_user.id
+    full_name = query.from_user.full_name or "Nepoznat"
+    user = get_or_create_user(user_id, full_name)
+
     await query.answer()
-    await query.edit_message_text("✅ Opcija zaprimljena (callback placeholder).")
+
+    # Admin uvijek može koristiti opcije
+    if not (ADMIN_ID is not None and user_id == ADMIN_ID):
+        if not user.get("approved", False):
+            await query.edit_message_text(
+                "⚠️ Još nemaš odobren pristup. Pričekaj da te admin odobri."
+            )
+            return
+        if not is_subscription_active(user):
+            await query.edit_message_text(
+                "⚠️ Tvoja pretplata je istekla. Javi se administratoru za produženje."
+            )
+            return
+
+    if data == "OPEN_MOOD_DIARY":
+        await query.edit_message_text(
+            "📓 Dnevnik emocija:\n\n"
+            "Slobodno mi napiši kako se osjećaš danas, što te muči ili što bi volio/la zabilježiti."
+        )
+        return
+
+    if data == "AI_PSYCHOLOGIST":
+        await query.edit_message_text(
+            "🧠 AI psiholog je spreman.\n"
+            "Napiši mi poruku i odgovorit ću ti kao podržavajući psihološki asistent."
+        )
+        return
+
+    if data == "THERAPY_MODE":
+        await query.edit_message_text(
+            "🎯 Terapijski mod:\n\n"
+            "Ovdje ćemo kasnije dodati više posebnih modova (npr. kognitivni, mindfulness itd.)."
+        )
+        return
+
+    if data == "EMOTION_ANALYSIS":
+        await query.edit_message_text(
+            "📊 Analiza emocija:\n\n"
+            "Pošalji mi nekoliko rečenica o tome kako si zadnjih dana, pa ću pokušati analizirati dominantne emocije."
+        )
+        return
+
+    if data == "WEEKLY_CHECK":
+        await query.edit_message_text(
+            "📅 Tjedni napredak:\n\n"
+            "Ovdje ćemo kasnije povezati tvoj tjedni pregled na temelju dnevnika i razgovora."
+        )
+        return
+
+    if data == "SHOW_HISTORY":
+        await query.edit_message_text(
+            "🗂 Arhiva:\n\n"
+            "Ovdje ćemo naknadno dodati prikaz povijesti razgovora iz conversations.json."
+        )
+        return
+
+    if data == "SHOW_PROFILE":
+        profile_lines = [
+            f"Ime: {user.get('name','')}",
+            f"Premium: {'DA' if user.get('premium', False) else 'NE'}",
+            f"Pretplata do: {user.get('subscription_until','nije postavljeno')}",
+        ]
+        await query.edit_message_text("👤 Tvoj profil:\n" + "\n".join(profile_lines))
+        return
+
+    if data == "PREMIUM_MENU":
+        await query.edit_message_text(
+            "⭐ Premium opcije:\n\n"
+            "- Napredna analiza emocija\n"
+            "- Tjedni izvještaj\n"
+            "- Psihološki testovi\n\n"
+            "Ovo možemo dalje proširivati po potrebi."
+        )
+        return
+
+    # Fallback
+    await query.edit_message_text("✅ Opcija zaprimljena.")
 
 # =====================================================
-# 8. WEBHOOK SERVER (FLASK + PTB BEZ UPDATER-A)
+# 9. WEBHOOK SERVER (FLASK + PTB BEZ UPDATER-A)
 # =====================================================
 
 app = Flask(__name__)
@@ -498,6 +658,7 @@ async def init_telegram_application():
     # Handleri
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("status", status_cmd))
+    application.add_handler(CommandHandler("menu", menu_cmd))
 
     application.add_handler(CommandHandler("pending", pending_cmd))
     application.add_handler(CommandHandler("approve", approve_cmd))
@@ -505,7 +666,9 @@ async def init_telegram_application():
     application.add_handler(CommandHandler("setpremium", setpremium_cmd))
 
     application.add_handler(CallbackQueryHandler(handle_button))
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    application.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message)
+    )
 
     await application.initialize()
     await application.start()
