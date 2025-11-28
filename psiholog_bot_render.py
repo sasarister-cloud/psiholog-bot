@@ -1,8 +1,11 @@
+# Psiholog Bot – Render webhook verzija
+# Integrirani meni, terapijski mod, dnevnik emocija, /menu, /help i povratak na glavni meni
+
 import os
 import json
 import asyncio
-from datetime import datetime, timedelta
-from typing import Dict, Any
+from datetime import datetime, timedelta, time as dtime
+from typing import Dict, Any, List
 import threading
 
 from flask import Flask, request
@@ -58,22 +61,22 @@ def ensure_files_exist():
             json.dump({}, f)
 
 
-def load_users():
+def load_users() -> Dict[str, Any]:
     with open(USERS_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
-def save_users(data):
+def save_users(data: Dict[str, Any]) -> None:
     with open(USERS_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 
-def load_conversations():
+def load_conversations() -> Dict[str, Any]:
     with open(CONVERSATIONS_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
-def save_conversations(data):
+def save_conversations(data: Dict[str, Any]) -> None:
     with open(CONVERSATIONS_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
@@ -85,50 +88,68 @@ ensure_files_exist()
 # =====================================================
 
 
+USER_DEFAULTS: Dict[str, Any] = {
+    "approved": True,              # default: odmah odobren (osim ako želiš ručno mijenjati)
+    "waiting": False,
+    "subscription_until": (datetime.utcnow() + timedelta(days=7)).strftime("%Y-%m-%d"),
+    "premium": False,
+    # terapija & stil
+    "therapist": "standard",
+    "therapy_mode": "NONE",      # NONE, CBT, ACT, DBT
+    # dnevnik emocija
+    "mood_log": [],               # lista dictova {timestamp, rating, note}
+    "mood_pending_rating": None,  # privremeno, kad čekaš opis nakon odabira 1–5
+    "daily_check": False,         # automatska dnevna provjera
+}
+
+
 def get_or_create_user(user_id: int, name: str) -> Dict[str, Any]:
     users = load_users()
     uid = str(user_id)
-    changed = False
 
     if uid not in users:
+        # novi korisnik
+        data = USER_DEFAULTS.copy()
+        data["name"] = name
+        # admin uvijek premium i "beskonačna" pretplata
         if ADMIN_ID and user_id == ADMIN_ID:
-            users[uid] = {
-                "name": name,
-                "approved": True,
-                "subscription_until": "2099-12-31",
-                "premium": True,
-                "waiting": False,
-            }
-        else:
-            users[uid] = {
-                "name": name,
-                "approved": False,
-                "subscription_until": (datetime.utcnow() + timedelta(days=7)).strftime("%Y-%m-%d"),
-                "premium": False,
-                "waiting": True,
-            }
-        changed = True
-
-    if ADMIN_ID and user_id == ADMIN_ID:
-        u = users[uid]
-        if not u.get("premium"):
-            u["premium"] = True
-            u["approved"] = True
-            u["subscription_until"] = "2099-12-31"
-            changed = True
-
-    if changed:
+            data["approved"] = True
+            data["premium"] = True
+            data["subscription_until"] = "2099-12-31"
+            data["waiting"] = False
+        users[uid] = data
         save_users(users)
+        return data
 
-    return users[uid]
+    # već postoji – dopuni eventualno nove ključeve
+    user = users[uid]
+    for k, v in USER_DEFAULTS.items():
+        user.setdefault(k, v)
+
+    user.setdefault("name", name)
+
+    # admin zaštita
+    if ADMIN_ID and user_id == ADMIN_ID:
+        user["approved"] = True
+        user["premium"] = True
+        user["subscription_until"] = "2099-12-31"
+        user["waiting"] = False
+
+    users[uid] = user
+    save_users(users)
+    return user
 
 
-def save_user(user_id: int, new_data: Dict[str, Any]):
+def save_user(user_id: int, new_data: Dict[str, Any]) -> None:
     users = load_users()
     uid = str(user_id)
     if uid in users:
         users[uid].update(new_data)
         save_users(users)
+
+
+def get_user_str(uid: str) -> Dict[str, Any] | None:
+    return load_users().get(uid)
 
 
 def is_subscription_active(u: Dict[str, Any]) -> bool:
@@ -138,23 +159,61 @@ def is_subscription_active(u: Dict[str, Any]) -> bool:
     except Exception:
         return False
 
+
 # =====================================================
-# 4. POMOĆNE FUNKCIJE – AI I DNEVNIK
+# 4. KONVERZACIJE
 # =====================================================
 
+
+def append_conversation(user_id: int, role: str, text: str) -> None:
+    all_conv = load_conversations()
+    uid = str(user_id)
+    all_conv.setdefault(uid, []).append(
+        {
+            "timestamp": datetime.utcnow().isoformat(),
+            "role": role,
+            "text": text,
+        }
+    )
+    save_conversations(all_conv)
+
+
+# =====================================================
+# 5. AI – TERAPIJSKI MODOVI
+# =====================================================
+
+THERAPY_PROMPTS: Dict[str, str] = {
+    "NONE": (
+        "Ti si empatičan, topao psihološki asistent. "
+        "Odgovaraj jasno, u 3–6 kraćih rečenica, na hrvatskom jeziku."
+    ),
+    "CBT": (
+        "Ti si psihološki asistent koji koristi elemente kognitivno-bihevioralne terapije (CBT). "
+        "Pomažeš korisniku da prepozna misli, emocije i ponašanja, te predlažeš konkretne korake i vježbe. "
+        "Odgovaraj u 3–6 rečenica, jednostavno i praktično."
+    ),
+    "ACT": (
+        "Ti si psihološki asistent u ACT stilu (Acceptance and Commitment Therapy). "
+        "Naglašavaš prihvaćanje emocija, povezivanje s osobnim vrijednostima i male korake prema onome što je važno. "
+        "Odgovaraj u 3–6 rečenica, smireno i podržavajuće."
+    ),
+    "DBT": (
+        "Ti si psihološki asistent u DBT stilu (dialektičko-bihevioralna terapija). "
+        "Naglašavaš regulaciju emocija, toleranciju distresa i mindfulness vježbe. "
+        "Odgovaraj u 3–6 rečenica, vrlo strukturirano i validirajuće."
+    ),
+}
+
+
 async def ai_chat_reply(user: Dict[str, Any], text: str) -> str:
+    mode = user.get("therapy_mode", "NONE")
+    system_prompt = THERAPY_PROMPTS.get(mode, THERAPY_PROMPTS["NONE"])
+
     try:
         completion = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "Ti si empatičan psihološki asistent. "
-                        "Odgovaraj sažeto (3–6 rečenica), toplo i podržavajuće. "
-                        "Izbjegavaj dijagnosticiranje, fokusiraj se na podršku i praktične korake."
-                    ),
-                },
+                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": text},
             ],
             max_tokens=900,
@@ -164,165 +223,334 @@ async def ai_chat_reply(user: Dict[str, Any], text: str) -> str:
         return f"⚠️ Greška AI servisa: {e}"
 
 
-def append_conversation(user_id: int, role: str, text: str):
-    all_conv = load_conversations()
-    uid = str(user_id)
+# =====================================================
+# 6. DNEVNIK EMOCIJA I DNEVNA PROVJERA
+# =====================================================
 
-    all_conv.setdefault(uid, []).append(
+
+def add_mood_entry(user: Dict[str, Any], rating: int, note: str | None = None) -> None:
+    mood_log: List[Dict[str, Any]] = user.get("mood_log", [])
+    mood_log.append(
         {
-            "timestamp": datetime.utcnow().isoformat(),
-            "role": role,
-            "text": text,
-        }
-    )
-
-    save_conversations(all_conv)
-
-
-def add_mood_entry(user: Dict[str, Any], rating: int, note: str):
-    diary = user.get("mood_diary") or []
-    diary.append(
-        {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M"),
             "rating": rating,
-            "note": note,
+            "note": note or "",
         }
     )
-    user["mood_diary"] = diary
+    # ograniči na zadnjih 90 unosa
+    if len(mood_log) > 90:
+        mood_log[:] = mood_log[-90:]
+    user["mood_log"] = mood_log
 
-# =====================================================
-# 5. HANDLERI – KOMANDE
-# =====================================================
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    name = update.effective_user.full_name
-    user = get_or_create_user(user_id, name)
+async def send_emotion_analysis(chat_id: int, user: Dict[str, Any], context: ContextTypes.DEFAULT_TYPE) -> None:
+    log = user.get("mood_log", [])
+    if len(log) < 3:
+        await context.bot.send_message(chat_id, "Za analizu treba barem 3 unosa u dnevnik emocija.")
+        return
 
-    # Admin ima sve
-    if ADMIN_ID and user_id == ADMIN_ID:
-        await update.message.reply_text("👋 Pozdrav, admin! Sve opcije su ti dostupne.")
-    else:
-        # Provjera pristupa
-        if not user.get("approved"):
-            await update.message.reply_text(
-                "⏳ Tvoj pristup još nije odobren.\n\n"
-                "Pričekaj da te administrator uključi u sustav."
-            )
-            return
+    last = log[-21:]
+    lines = [
+        f"{e['timestamp']}: {e['rating']} – {e.get('note','')[:80]}" for e in last
+    ]
+    joined = "\n".join(lines)
 
-        if not is_subscription_active(user):
-            await update.message.reply_text(
-                "⚠️ Tvoja pretplata je istekla.\n\n"
-                "Ako želiš nastaviti koristiti bota, javi se administratoru."
-            )
-            return
+    prompt = (
+        "Na temelju ovih unosa u dnevniku emocija:\n\n"
+        f"{joined}\n\n"
+        "Analiziraj kako se korisnik otprilike osjeća kroz vrijeme, moguće okidače, "
+        "obrasce razmišljanja i predloži 3–5 konkretnih koraka za brigu o sebi."
+    )
 
-    # GLAVNI MENI – kao u lokalnoj verziji
-    buttons = [
-        [InlineKeyboardButton("📓 Dnevnik emocija", callback_data="OPEN_MOOD_DIARY")],
+    result = await ai_chat_reply(user, prompt)
+    await context.bot.send_message(chat_id, "📊 *Analiza emocija:*\n\n" + result, parse_mode="Markdown")
+
+
+async def daily_check_job(context: ContextTypes.DEFAULT_TYPE) -> None:
+    chat_id = context.job.chat_id
+    uid = str(chat_id)
+    user = get_user_str(uid)
+    if not user or not user.get("daily_check"):
+        return
+
+    keyboard = [
         [
-            InlineKeyboardButton("🧠 AI psiholog", callback_data="CHAT_START"),
-            InlineKeyboardButton("🎯 Terapijski mod", callback_data="CHOOSE_MODE"),
+            InlineKeyboardButton("1 😞", callback_data="MOOD_1"),
+            InlineKeyboardButton("2 🙁", callback_data="MOOD_2"),
+            InlineKeyboardButton("3 😐", callback_data="MOOD_3"),
         ],
-        [InlineKeyboardButton("📊 Analiza emocija", callback_data="EMOTION_ANALYSIS")],
         [
-            InlineKeyboardButton("⏰ Dnevna provjera", callback_data="DAILY_CHECK_INFO"),
-            InlineKeyboardButton("🗂 Arhiva", callback_data="SHOW_HISTORY"),
+            InlineKeyboardButton("4 🙂", callback_data="MOOD_4"),
+            InlineKeyboardButton("5 😄", callback_data="MOOD_5"),
+        ],
+    ]
+    await context.bot.send_message(
+        chat_id,
+        "⏰ Dnevna provjera: kako si danas (1–5)?",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
+
+
+def schedule_daily(app: Application, chat_id: int) -> None:
+    # svaki dan u 20:00 po server vremenu
+    app.job_queue.run_daily(
+        daily_check_job,
+        time=dtime(hour=20, minute=0),
+        chat_id=chat_id,
+        name=f"daily_{chat_id}",
+    )
+
+
+# =====================================================
+# 7. GLAVNI MENI
+# =====================================================
+
+
+def build_main_menu(user: Dict[str, Any]) -> InlineKeyboardMarkup:
+    kb: List[List[InlineKeyboardButton]] = [
+        [InlineKeyboardButton("💬 Počni razgovor", callback_data="CHAT_START")],
+        [
+            InlineKeyboardButton("📓 Dnevnik emocija", callback_data="OPEN_MOOD_DIARY"),
+            InlineKeyboardButton("📊 Analiza emocija", callback_data="EMOTION_ANALYSIS"),
+        ],
+        [
+            InlineKeyboardButton("⏰ Dnevna provjera", callback_data="TOGGLE_DAILY"),
+            InlineKeyboardButton("🧠 Terapijski mod", callback_data="CHOOSE_MODE"),
         ],
         [
             InlineKeyboardButton("🎲 Dnevni izazov", callback_data="DAILY_CHALLENGE"),
-            InlineKeyboardButton("🧪 Testovi", callback_data="TEST_MENU"),
+            InlineKeyboardButton("⭐ Premium info", callback_data="PREMIUM_INFO"),
         ],
-        [InlineKeyboardButton("🚨 Hitni način", callback_data="EMERGENCY_MODE")],
-        [InlineKeyboardButton("👤 Profil", callback_data="PROFILE")],
+        [InlineKeyboardButton("ℹ️ Pomoć", callback_data="HELP_MENU")],
     ]
+    return InlineKeyboardMarkup(kb)
 
-    if not user.get("premium", False) and not (ADMIN_ID and user_id == ADMIN_ID):
-        buttons.append(
-            [InlineKeyboardButton("⭐ Premium paketi (B i C)", callback_data="PREMIUM_INFO")]
-        )
 
-    menu = InlineKeyboardMarkup(buttons)
+def main_menu_text(user: Dict[str, Any]) -> str:
+    mode = user.get("therapy_mode", "NONE")
+    mode_txt = "isključen" if mode == "NONE" else mode
+    premium_txt = "DA" if user.get("premium") else "NE"
+    return (
+        "🤖 *Psiholog Bot – glavni izbornik*\n\n"
+        f"⭐ Premium: {premium_txt}\n"
+        f"🎯 Terapijski mod: {mode_txt}\n\n"
+        "Odaberi što želiš raditi upravo sada."
+    )
 
-    await update.message.reply_text(
-        "🧭 *Glavni izbornik*\nOdaberi što želiš:",
+
+async def send_main_menu(chat_id: int, user: Dict[str, Any], context: ContextTypes.DEFAULT_TYPE) -> None:
+    await context.bot.send_message(
+        chat_id,
+        main_menu_text(user),
+        reply_markup=build_main_menu(user),
         parse_mode="Markdown",
-        reply_markup=menu,
     )
 
 
-async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    u = get_or_create_user(update.effective_user.id, update.effective_user.full_name)
-    await update.message.reply_text(
-        f"📊 Status:\n"
-        f"Odobren: {u.get('approved', False)}\n"
-        f"Premium: {u.get('premium', False)}\n"
-        f"Pretplata do: {u.get('subscription_until', 'N/A')}"
+async def edit_to_main_menu(query, user: Dict[str, Any]) -> None:
+    await query.edit_message_text(
+        main_menu_text(user),
+        reply_markup=build_main_menu(user),
+        parse_mode="Markdown",
     )
 
+
+def back_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        [[InlineKeyboardButton("⬅️ Glavni meni", callback_data="BACK_MAIN")]]
+    )
+
+
 # =====================================================
-# 6. HANDLER – PORUKE
+# 8. KOMANDE
 # =====================================================
 
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.effective_user.id
     name = update.effective_user.full_name
     user = get_or_create_user(user_id, name)
 
-    # Admin uvijek prolazi, ostali podložni provjerama
-    if not (ADMIN_ID and user_id == ADMIN_ID):
-        if not user.get("approved"):
-            await update.message.reply_text("⚠️ Još nemaš odobren pristup.")
-            return
-        if not is_subscription_active(user):
-            await update.message.reply_text("⚠️ Tvoja pretplata je istekla.")
-            return
-
-    text = update.message.text or ""
-
-    # 1) Ako korisnik dovršava unos u dnevnik emocija (bilješka)
-    if "mood_pending_rating" in user:
-        rating = user.pop("mood_pending_rating")
-        add_mood_entry(user, rating, note=text)
-        save_user(user_id, user)
+    if not is_subscription_active(user):
         await update.message.reply_text(
-            "📓 Zabilježio sam tvoju emociju i bilješku u dnevnik.\n"
-            "Hvala ti što dijeliš kako se osjećaš. ❤️"
+            "⚠️ Tvoja probna pretplata je istekla. Javi se administratoru za nastavak."
         )
         return
 
-    # 2) Klasičan AI razgovor
+    await update.message.reply_text(
+        "👋 Dobrodošao/la u Psiholog bota!\n\n"
+        "Koristi me za kratke razgovore, vođenje dnevnika emocija i male terapijske korake.",
+    )
+    await send_main_menu(update.effective_chat.id, user, context)
+
+
+async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    text = (
+        "📋 *Komande: *\n"
+        "/start – pokretanje / nastavak rada\n"
+        "/help – ova pomoć\n"
+        "/status – stanje pretplate i premiuma\n"
+        "/profile – (opcionalno) kratka forma o tebi (još u izradi)\n"
+        "/menu ili /meni – prikaži glavni izbornik\n"
+        "/mood – brzi unos raspoloženja (1–5 + bilješka)\n"
+        "/history – (opcionalno) arhiva razgovora (osnovna verzija)\n"
+        "\nVećinu vremena dovoljno je koristiti glavni meni."
+    )
+    await update.message.reply_text(text, parse_mode="Markdown")
+
+
+async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = update.effective_user.id
+    uid = str(user_id)
+    user = get_user_str(uid)
+    if not user:
+        await update.message.reply_text("Nisi registriran. Pošalji /start.")
+        return
+
+    expiry_str = user.get("subscription_until")
+    if not expiry_str:
+        await update.message.reply_text("⚠️ Problem s pretplatom. Javite se administratoru.")
+        return
+
+    expiry = datetime.strptime(expiry_str, "%Y-%m-%d")
+    days_left = (expiry.date() - datetime.utcnow().date()).days
+    premium_flag = "DA" if user.get("premium") else "NE"
+
+    await update.message.reply_text(
+        f"📅 Pretplata vrijedi do: {expiry_str}\n"
+        f"Preostalo dana: {max(days_left, 0)}\n"
+        f"⭐ Premium: {premium_flag}"
+    )
+
+
+async def profile_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text(
+        "Profil i detaljnija personalizacija su u pripremi. Za sada me slobodno koristi i bez toga."
+    )
+
+
+async def menu_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = update.effective_user.id
+    name = update.effective_user.full_name
+    user = get_or_create_user(user_id, name)
+
+    if not is_subscription_active(user):
+        await update.message.reply_text("⚠️ Tvoja pretplata je istekla.")
+        return
+
+    await send_main_menu(update.effective_chat.id, user, context)
+
+
+async def mood_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = update.effective_user.id
+    user = get_or_create_user(user_id, update.effective_user.full_name)
+
+    keyboard = [
+        [
+            InlineKeyboardButton("1 😞", callback_data="MOOD_1"),
+            InlineKeyboardButton("2 🙁", callback_data="MOOD_2"),
+            InlineKeyboardButton("3 😐", callback_data="MOOD_3"),
+        ],
+        [
+            InlineKeyboardButton("4 🙂", callback_data="MOOD_4"),
+            InlineKeyboardButton("5 😄", callback_data="MOOD_5"),
+        ],
+    ]
+    await update.message.reply_text(
+        "Kako si sada na skali 1–5?", reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
+
+async def history_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    uid = str(update.effective_chat.id)
+    conv = load_conversations().get(uid, [])
+    if not conv:
+        await update.message.reply_text("Nema spremljene povijesti razgovora.")
+        return
+
+    last = conv[-10:]
+    lines = [f"{c['timestamp']}: {c['role']}: {c['text'][:80]}" for c in last]
+    await update.message.reply_text("📜 Zadnji dijelovi razgovora:\n\n" + "\n".join(lines))
+
+
+async def weekly_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text(
+        "Tjedni psihološki izvještaj će uskoro biti dodat kao posebna opcija."
+    )
+
+
+async def tests_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text(
+        "Psihološki testovi (PHQ-9, GAD-7 i slično) bit će dodani u sljedećoj verziji."
+    )
+
+
+# =====================================================
+# 9. HANDLE MESSAGE – GLAVNA LOGIKA
+# =====================================================
+
+
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = update.effective_user.id
+    chat_id = update.effective_chat.id
+    text = (update.message.text or "").strip()
+
+    user = get_or_create_user(user_id, update.effective_user.full_name)
+
+    if not is_subscription_active(user):
+        await update.message.reply_text("❌ Tvoja pretplata je istekla.")
+        return
+
+    # Ako čekamo opis raspoloženja nakon odabira 1–5
+    if user.get("mood_pending_rating") is not None:
+        rating = user["mood_pending_rating"]
+        add_mood_entry(user, rating, text)
+        user["mood_pending_rating"] = None
+        save_user(user_id, user)
+        await update.message.reply_text("Hvala ti, zapisao sam tvoj unos u dnevnik emocija.")
+        return
+
+    # inače – običan razgovor
     append_conversation(user_id, "user", text)
     reply = await ai_chat_reply(user, text)
     append_conversation(user_id, "bot", reply)
 
     await update.message.reply_text(reply)
 
+
 # =====================================================
-# 7. HANDLER – GUMBI (CALLBACK QUERY)
+# 10. INLINE GUMBI (MENI, TERAPIJSKI MOD, DNEVNIK…)
 # =====================================================
 
-async def handle_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+async def handle_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     data = query.data
     user_id = query.from_user.id
-    user = get_or_create_user(user_id, query.from_user.full_name)
+    chat_id = query.message.chat_id
 
     await query.answer()
 
-    # Osnovne provjere pristupa (osim za admina)
-    if not (ADMIN_ID and user_id == ADMIN_ID):
-        if not user.get("approved"):
-            await query.edit_message_text("⚠️ Još nemaš odobren pristup.")
-            return
-        if not is_subscription_active(user):
-            await query.edit_message_text("⚠️ Tvoja pretplata je istekla.")
-            return
+    user = get_or_create_user(user_id, query.from_user.full_name)
 
-    premium = bool(user.get("premium", False))
+    if not is_subscription_active(user):
+        await query.edit_message_text("❌ Tvoja pretplata je istekla.")
+        return
 
-    # --- DNEVNIK EMOCIJA / RASPOLOŽENJE ---
+    # Povratak na glavni meni
+    if data == "BACK_MAIN":
+        await edit_to_main_menu(query, user)
+        return
+
+    # Glavni chat
+    if data == "CHAT_START":
+        await query.edit_message_text(
+            "💬 Slobodno mi napiši što te muči ili o čemu želiš razgovarati.",
+            reply_markup=back_keyboard(),
+        )
+        return
+
+    # Dnevnik emocija – odabir 1–5
     if data == "OPEN_MOOD_DIARY":
         keyboard = [
             [
@@ -336,7 +564,7 @@ async def handle_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ],
         ]
         await query.edit_message_text(
-            "📓 Kako se osjećaš (1–5)?",
+            "📓 Dnevnik emocija – odaberi trenutno raspoloženje (1–5):",
             reply_markup=InlineKeyboardMarkup(keyboard),
         )
         return
@@ -345,83 +573,92 @@ async def handle_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             rating = int(data.replace("MOOD_", ""))
         except ValueError:
-            rating = 3
+            await query.edit_message_text("Nevažeća vrijednost raspoloženja.")
+            return
+
+        add_mood_entry(user, rating, None)
         user["mood_pending_rating"] = rating
         save_user(user_id, user)
+
         await query.edit_message_text(
-            f"📓 Zabilježio sam ocjenu {rating}.\n\n"
-            "Ako želiš, napiši mi poruku s kratkim opisom što se dogodilo – "
-            "ta poruka će biti spremljena uz ovaj unos."
+            "Hvala ti. Ako želiš, ukratko opiši što se događa (ili samo napiši /menu za povratak).",
         )
         return
 
-    # --- AI RAZGOVOR ---
-    if data == "CHAT_START":
-        await query.edit_message_text(
-            "💬 Slobodno napiši što te muči.\n"
-            "Ja ću ti odgovoriti kao podržavajući AI psiholog."
-        )
-        return
-
-    # --- PROFIL ---
-    if data == "PROFILE":
-        await query.edit_message_text(
-            "👤 *Tvoj profil*\n\n"
-            f"Ime: {user.get('name', 'N/A')}\n"
-            f"Odobren: {user.get('approved', False)}\n"
-            f"Pretplata do: {user.get('subscription_until', 'N/A')}\n"
-            f"Premium: {user.get('premium', False)}",
-            parse_mode="Markdown",
-        )
-        return
-
-    # --- PAKET B / ANALIZA EMOCIJA (premium) ---
     if data == "EMOTION_ANALYSIS":
-        if not premium and not (ADMIN_ID and user_id == ADMIN_ID):
+        await query.edit_message_text(
+            "⏳ Radim analizu tvojih unosa u dnevniku emocija…",
+            reply_markup=back_keyboard(),
+        )
+        await send_emotion_analysis(chat_id, user, context)
+        return
+
+    if data == "TOGGLE_DAILY":
+        user["daily_check"] = not user.get("daily_check", False)
+        save_user(user_id, user)
+
+        # makni prijašnji job, ako postoji
+        jq = context.application.job_queue
+        jobs = jq.get_jobs_by_name(f"daily_{chat_id}")
+        for j in jobs:
+            j.schedule_removal()
+
+        if user["daily_check"]:
+            schedule_daily(context.application, chat_id)
+            msg = "✅ Uključena je dnevna provjera raspoloženja u 20:00."
+        else:
+            msg = "⛔ Isključena je dnevna provjera raspoloženja."
+
+        await query.edit_message_text(msg, reply_markup=back_keyboard())
+        return
+
+    if data == "CHOOSE_MODE":
+        kb = [
+            [InlineKeyboardButton("Isključen", callback_data="MODE_NONE")],
+            [InlineKeyboardButton("CBT", callback_data="MODE_CBT")],
+            [InlineKeyboardButton("ACT", callback_data="MODE_ACT")],
+            [InlineKeyboardButton("DBT", callback_data="MODE_DBT")],
+        ]
+        await query.edit_message_text(
+            "🎯 Odaberi terapijski mod (stil odgovora):",
+            reply_markup=InlineKeyboardMarkup(kb),
+        )
+        return
+
+    if data.startswith("MODE_"):
+        mode = data.replace("MODE_", "")
+        if mode == "NONE":
+            user["therapy_mode"] = "NONE"
+            save_user(user_id, user)
             await query.edit_message_text(
-                "🔒 Analiza emocija je dio ⭐ Paketa B.\n\n"
-                "Javi se administratoru ako želiš nadogradnju."
+                "🎯 Terapijski mod je isključen.", reply_markup=back_keyboard()
             )
             return
-        await query.edit_message_text(
-            "📊 Analiza emocija će uskoro biti potpuno integrirana u ovu verziju bota.\n"
-            "Za sada nastavi koristiti dnevnik emocija i AI psihologa. 😊"
-        )
-        return
-
-    # --- DNEVNE RUTINE / PROVJERA ---
-    if data == "DAILY_CHECK_INFO":
-        await query.edit_message_text(
-            "🕒 *Dnevna provjera raspoloženja*\n\n"
-            "U ovoj verziji bota dnevna provjera funkcionira kroz:\n"
-            "• Dnevnik emocija (📓)\n"
-            "• Kraće provjere kada ti zatreba\n\n"
-            "U budućnosti ćemo dodati automatske notifikacije u određeno vrijeme dana. 🙂",
-            parse_mode="Markdown",
-        )
-        return
-
-    # --- ARHIVA RAZGOVORA ---
-    if data == "SHOW_HISTORY":
-        conv = load_conversations()
-        msgs = conv.get(str(user_id), [])
-        if not msgs:
-            await query.edit_message_text("🗂 Trenutno nema sačuvanih poruka u arhivi.")
+        if mode not in ("CBT", "ACT", "DBT"):
+            await query.edit_message_text("Nepoznat terapijski mod.")
             return
-
-        tail = msgs[-20:]
-        lines = []
-        for msg in tail:
-            ts = msg.get("timestamp", "")[:16].replace("T", " ")
-            role = "👤" if msg.get("role") == "user" else "🤖"
-            text = msg.get("text", "")
-            lines.append(f"[{ts}] {role}: {text}")
-
-        txt = "🗂 *Zadnjih 20 poruka:*\n\n" + "\n".join(lines)
-        await query.edit_message_text(txt, parse_mode="Markdown")
+        user["therapy_mode"] = mode
+        save_user(user_id, user)
+        await query.edit_message_text(
+            f"🎯 Terapijski mod postavljen na: *{mode}*.",
+            parse_mode="Markdown",
+            reply_markup=back_keyboard(),
+        )
         return
 
-    # --- DNEVNI IZAZOV / DNEVNE RUTINE (Paket B/C feeling) ---
+    if data == "PREMIUM_INFO":
+        await query.edit_message_text(
+            "⭐ *Premium uključuje: *\n"
+            "• Analizu emocija\n"
+            "• Različite terapijske stilove (CBT, ACT, DBT)\n"
+            "• Dnevnu emocionalnu provjeru\n"
+            "• Dodatne napredne opcije u budućnosti\n\n"
+            "Za nadogradnju javi se administratoru.",
+            parse_mode="Markdown",
+            reply_markup=back_keyboard(),
+        )
+        return
+
     if data == "DAILY_CHALLENGE":
         prompt = (
             "Smisli jedan mali, jednostavan dnevni izazov za mentalno zdravlje "
@@ -432,58 +669,40 @@ async def handle_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(
             "🎲 *Dnevni izazov:*\n\n" + challenge,
             parse_mode="Markdown",
+            reply_markup=back_keyboard(),
         )
         return
 
-    # --- TESTOVI (Paket B/C) – zasad informativno ---
+    if data == "HELP_MENU":
+        await query.edit_message_text(
+            "ℹ️ Ovdje si uvijek možeš: \n"
+            "• otvoriti razgovor (Počni razgovor)\n"
+            "• upisati kako se osjećaš (Dnevnik emocija)\n"
+            "• dobiti analizu raspoloženja (Analiza emocija)\n"
+            "• uključiti/isključiti dnevnu provjeru\n"
+            "• prilagoditi stil odgovora (Terapijski mod).\n\n"
+            "Za listu komandi koristi /help.",
+            reply_markup=back_keyboard(),
+        )
+        return
+
     if data == "TEST_MENU":
         await query.edit_message_text(
-            "🧪 Psihološki testovi (PHQ-9, GAD-7 i drugi) bit će uskoro dostupni u ovoj verziji bota.\n\n"
-            "Za sada se možeš koristiti dnevnikom emocija i AI psihologom.",
-        )
-        return
-
-    # --- HITNI NAČIN ---
-    if data == "EMERGENCY_MODE":
-        user["emergency_mode"] = True
-        save_user(user_id, user)
-        crisis_text = (
-            "🚨 *Hitni način uključen.*\n\n"
-            "Ako si u neposrednoj opasnosti ili razmišljaš o samoozljeđivanju, "
-            "ODMAH nazovi 112 ili lokalnu hitnu psihijatriju.\n"
-            "Također, javi se osobi od povjerenja.\n\n"
-            "Ovdje možeš napisati kako se osjećaš, ali imaj na umu da sam AI "
-            "i ne mogu zamijeniti stručnu pomoć."
-        )
-        await query.edit_message_text(crisis_text, parse_mode="Markdown")
-        return
-
-    # --- PAKETI B I C INFO ---
-    if data == "PREMIUM_INFO":
-        await query.edit_message_text(
-            "⭐ *Premium paketi (B i C)*\n\n"
-            "🌟 *Paket B – Napredna emocionalna podrška*\n"
-            "• Analiza emocija\n"
-            "• Dnevne refleksije i izazovi\n"
-            "• Osnovni emocionalni uvidi kroz vrijeme\n\n"
-            "🔥 *Paket C – Napredni osobni razvoj*\n"
-            "• Sve iz paketa B\n"
-            "• Detaljniji uvidi u obrasce razmišljanja\n"
-            "• Podrška u ciljevima i promjeni navika\n\n"
-            "Za više informacija i nadogradnju javi se administratoru.",
-            parse_mode="Markdown",
+            "🧪 Psihološki testovi će biti dodani u sljedećoj verziji.",
+            reply_markup=back_keyboard(),
         )
         return
 
     # Fallback
-    await query.edit_message_text("✅ Opcija zaprimljena.")
+    await query.edit_message_text("✅ Opcija je zaprimljena.")
+
 
 # =====================================================
-# 8. WEBHOOK + EVENT LOOP
+# 11. WEBHOOK + EVENT LOOP ZA RENDER
 # =====================================================
 
 app = Flask(__name__)
-application = None
+application: Application | None = None
 loop = None
 
 
@@ -495,6 +714,7 @@ def index():
 @app.post(f"/webhook/{TELEGRAM_TOKEN}")
 def telegram_webhook():
     from telegram import Update as TgUpdate
+
     global application, loop
 
     data = request.get_json(force=True)
@@ -506,15 +726,27 @@ def telegram_webhook():
     return "OK", 200
 
 
-async def init_telegram_application():
+async def init_telegram_application() -> None:
     global application
 
-    # .updater(None) je KLJUČ da izbjegnemo Updater bug na PTB 20.8 + Python 3.13
     application = Application.builder().token(TELEGRAM_TOKEN).updater(None).build()
 
+    # komande
     application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("help", help_cmd))
     application.add_handler(CommandHandler("status", status_cmd))
+    application.add_handler(CommandHandler("profile", profile_cmd))
+    application.add_handler(CommandHandler("menu", menu_cmd))
+    application.add_handler(CommandHandler("meni", menu_cmd))
+    application.add_handler(CommandHandler("mood", mood_cmd))
+    application.add_handler(CommandHandler("history", history_cmd))
+    application.add_handler(CommandHandler("weekly", weekly_cmd))
+    application.add_handler(CommandHandler("tests", tests_cmd))
+
+    # inline gumbi
     application.add_handler(CallbackQueryHandler(handle_button))
+
+    # tekst poruke
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
     await application.initialize()
@@ -529,7 +761,7 @@ async def init_telegram_application():
     await application.bot.set_webhook(url=webhook_url)
 
 
-def start_flask():
+def start_flask() -> None:
     port = int(os.environ.get("PORT", "10000"))
     print(f"🚀 Flask na portu {port}")
     app.run(host="0.0.0.0", port=port)
@@ -546,4 +778,9 @@ if __name__ == "__main__":
     threading.Thread(target=start_flask, daemon=True).start()
 
     print("✅ Bot i webhook su pokrenuti.")
-    loop.run_forever()
+
+    # drži event loop živim
+    try:
+        loop.run_forever()
+    except KeyboardInterrupt:
+        pass
